@@ -1,0 +1,35 @@
+rng(1)
+
+% marginal sizes
+m = 20;
+n = 15;
+
+% inverse temp
+beta = 1;
+
+eta = 2/beta; % step size
+maxIter = ceil(10*beta); % number of iterations
+
+% sample random points and form quadratic cost
+x = randn(m,1);
+y = randn(n,1);
+C = (x-y.').^2;
+
+% uniform marginals
+mu = ones(m,1)/m;
+nu = ones(n,1)/n;
+
+% initialize dual variables
+phi = zeros(m,1);
+psi = zeros(n,1);
+
+
+dualObj = zeros(maxIter,1);
+
+for iter=1:maxIter
+    A = C - phi - psi';
+    X = exp(-beta*A);
+    val = sum(sum(X));
+    dualObj(iter) = -(1/beta)*log(val);
+    P = X/val;
+    
