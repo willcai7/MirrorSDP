@@ -1,3 +1,4 @@
+%% Initialization 
 % grid size
 n = 100;
 
@@ -36,13 +37,18 @@ N = 2; % number of electrons
 alpha = 1/beta; % primal step size
 gamma = 1/(2*beta); % dual step size
 S = 50; % number of stochastic matvecs
+ffermi = @(x) 1./(1+exp(beta*x)); % Fermi-Dirac function
+sffermi = @(x) sum(1./(1+exp(beta*x))); % sum of Fermi-Dirac function
+
+
+%% Mirror Descent 
 
 % initialize
 mu = 0; % chemical potential
 Heff = H0; % effective hamiltonian
-NhatHist = zeros(maxIter,1); % history of estimated electron numbers
-rhoHist = zeros(n,maxIter); % history of estimated electron densities
-
+MD_NhatHist = zeros(maxIter,1); % history of estimated electron numbers
+MD_rhoHist = zeros(n,maxIter); % history of estimated electron densities
+MD_muHist = zeros(maxIter,1); % history of the chemical potentials
 % run
 for iter=1:maxIter
 
@@ -70,10 +76,78 @@ for iter=1:maxIter
     Heff = (1-alpha)*Heff + alpha*(H0 - mu*eye(n) + diag(VH));
     
     % save history
-    rhoHist(:,iter) = rho;
-    NhatHist(iter) = Nhat;
+    MD_rhoHist(:,iter) = rho;
+    MD_NhatHist(iter) = Nhat;
+    MD_muHist(iter) = mu;
 
 end
 
-figure(1);plot(NhatHist(2:end))
-figure(2);plot(mean(rhoHist(:,maxIter/2:end),2))
+
+
+%% SCF 
+
+range_mu=[-10000, 10000]; % chemical potential
+Heff = H0; % effective hamiltonian
+SCF_NhatHist = zeros(maxIter,1); % history of estimated electron numbers
+SCF_rhoHist = zeros(n,maxIter); % history of estimated electron densities
+SCF_muHist = zeros(maxIter,1); % history of the chemical potentials
+precision = 1e-6;
+
+for iter =1:maxIter 
+    [U,E] = eig(Heff);
+    e = diag(E);
+
+    % Find best mu 
+    mu_lb = range_mu(1);
+    mu_ub = range_mu(2);
+    mu_mid = (mu_lb + mu_ub)/2;
+    while (abs(sffermi(e-mu_mid)-N) >precision)
+        if sffermi(e-mu_mid)-N>0
+            mu_ub = mu_mid;
+            mu_mid = (mu_lb + mu_ub)/2;
+        else
+            mu_lb = mu_mid;
+            mu_mid = (mu_lb + mu_ub)/2;
+        end
+    end
+    
+    % Get rho by the FD function
+    rho = diag(U*diag(ffermi(e-mu_mid))*U');
+    Nhat = sum(rho);
+
+    % Build Hartree
+    VH = K*rho;
+
+    % effective hamiltonian update (primal mirror descent step)
+    Heff = H0 + diag(VH);
+    
+    % save history
+    SCF_rhoHist(:,iter) = rho;
+    SCF_NhatHist(iter) = Nhat;
+    SCF_muHist(iter) = mu;
+
+end
+
+%% Plot 
+
+figure(1);
+subplot(1,3,2);
+plot(MD_NhatHist(2:end));
+hold on;
+plot(SCF_NhatHist(2:end));
+xlabel("Iterations");
+title("$\hat N$", 'Interpreter','latex')
+
+subplot(1,3,1);
+plot(mean(MD_rhoHist(:,maxIter/2:end),2));
+hold on;
+plot(mean(SCF_rhoHist(:,maxIter/2:end),2));
+title("Average $\rho$", 'Interpreter','latex')
+
+subplot(1,3,3);
+plot(MD_muHist(2:end));
+hold on;
+plot(SCF_muHist(2:end));
+legend("Mirror Descent", "Deterministic SCF");
+title("$\mu$", 'Interpreter','latex')
+xlabel("Iterations");
