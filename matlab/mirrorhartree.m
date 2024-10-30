@@ -28,7 +28,7 @@ K = 2*(1-sqrt(1-cos(2*pi*(xg'-xg))));
 
 % construct noninteracting Hamiltonian
 H0 = 0.5*L + V;
-H0 = (H0+H0')/2;
+H0 = (  H0+H0')/2;
 
 % parameters
 beta = 50; % inverse temp

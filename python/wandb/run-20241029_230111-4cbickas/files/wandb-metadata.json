@@ -1,0 +1,42 @@
+{
+  "os": "Windows-11-10.0.22631-SP0",
+  "python": "3.12.2",
+  "startedAt": "2024-10-30T06:01:11.890876Z",
+  "program": "f:\\Drives\\Github\\MirrorSDP\\python\\eg.py",
+  "codePath": "eg.py",
+  "git": {
+    "remote": "https://github.com/willcai7/MirrorSDP.git"
+  },
+  "email": "willcai754@gmail.com",
+  "root": "F:\\Drives\\Github\\MirrorSDP\\python",
+  "host": "Achilles",
+  "username": "willc",
+  "executable": "E:\\Anaconda\\envs\\general\\python.exe",
+  "codePathLocal": "eg.py",
+  "cpu_count": 24,
+  "cpu_count_logical": 32,
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1056663662592",
+      "used": "27344588800"
+    }
+  },
+  "memory": {
+    "total": "68488781824"
+  },
+  "cpu": {
+    "count": 24,
+    "countLogical": 32
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 4090",
+      "memoryTotal": "25757220864",
+      "cudaCores": 16384,
+      "architecture": "Ada"
+    }
+  ],
+  "cudaVersion": "12.6"
+}
